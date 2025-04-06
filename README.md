@@ -67,4 +67,4 @@ Fiecare pin a fost ales tinand cont de:
 usurinta de rutare;
  compatibilitatea cu perifericele ESP32-C6;
 
-![Diagrama BLOC](<Blank diagram-1.png>)
+![Diagrama BLOC](Diagram.png)
