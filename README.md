@@ -1,4 +1,75 @@
-# BOM TSC – Lista de componente
+# OpenBook - Open Source e-Book Reader
+
+
+## Functionalitate hardware
+
+Dispozitivul OpenBook integreaza o serie de module si componente menite sa ofere o experienta completa pentru citirea cartilor in format digital, precum si extinderea functiilor prin senzori si periferice externe. Hardware-ul este compus din mai multe blocuri functionale, fiecare avand rolul. Am integrat atat componente de interfata (buton, ecran), cat si senzori, circuite de alimentare si protectie.
+
+### Componente principale:
+
+## Dispozitivul este compus dintr-un set de componente atent alese pentru a oferi un echilibru perfect intre performanta, consum redus de energie si modularitate. ##
+|  Componenta            | Descriere                                                      |
+|---------------------------|----------------------------------------------------------------|
+|ESP32-C6-WROOM-1-N8  | MCU principal cu WiFi 6, BLE 5.0, SPI, I2C, UART               |
+|E-paper Display | Afisaj ultra-low power, interfata SPI                          |
+|SD Card         | Stocare pentru fisiere e-book si configurari                   |
+|NOR Flash 64MB  | Memorie suplimentara pentru firmware si date                   |
+|RTC-DS3231SN | Ceas in timp real, exact si stabil                             |
+|    BME688   | Senzor de mediu complet: T, RH, presiune, VOC                  |
+| MAX17048    | Masurare SoC baterie, tensiune, temperatura                  |
+|MCP73831     | Incarcare LiPo simpla si eficienta                           |
+|XC6220 LDO      | Regulare 5V -> 3.3V cu zgomot scazut                            |
+|USB-C           | Alimentare + flash firmware + protectie ESD                   |
+|Qwiic/Stemma QT | Extensie rapida pentru senzori I2C                            |
+
+
+
+---
+
+## Pinout ESP32-C6
+
+Mai jos este un rezumat al pinilor folositi pe microcontroller, cu functiile si componenta asociata:
+
+| GPIO  | Componenta        | Functie                     |
+|--------|--------------------|-----------------------------|
+| EN     | Buton Reset        | Reset hardware              |
+| IO0    | RTC                | INT_RTC (interupt RTC)      |
+| IO1    | RTC                | 32KHz output                |
+| IO2    | SD Card            | MISO                        |
+| IO3    | E-paper Display    | EPD_BUSY                    |
+| IO4    | SD Card            | SS_SD (chip select)         |
+| IO5    | E-paper Display    | EPD_DC                      |
+| IO6    | SPI Shared         | SCK                         |
+| IO7    | SPI Shared         | MOSI                        |
+| IO8    | GPIO               | Utilizare generica          |
+| IO9    | Boot Button        | Mod programare              |
+| IO10   | E-paper Display    | EPD_CS                      |
+| IO11   | NOR Flash          | FLASH_CS                    |
+| IO12   | USB Interface      | USB_D-                      |
+| IO13   | USB Interface      | USB_D+                      |
+| IO15   | Buton Change       | Detectare schimbare         |
+| IO16   | UART               | TX (debug serial)           |
+| IO17   | UART               | RX (debug serial)           |
+| IO18   | RTC                | RTC_RST                     |
+| IO19   | MAX17048           | I2C_PW (alimentare I2C)     |
+| IO20   | E-paper Display    | EPD_3V3_C (power control)   |
+| IO21   | I2C Shared         | SDA                         |
+| IO22   | I2C Shared         | SCL                         |
+| IO23   | E-paper Display    | EPD_RST                     |
+
+---
+
+## Arhitectura si comunicatii
+
+- **SPI Bus** este partajat intre: SD Card, E-paper Display, NOR Flash
+- **I2C Bus** este partajat intre: RTC, BME688, MAX17048, Qwiic port
+- **UART** este utilizat pentru debugging (TX/RX)
+- **USB-C** foloseste GPIO dedicate pentru DP/DM si incarcare
+
+---
+![Diagrama BLOC](Blank%20diagram.png)
+
+# BOM TSC - Lista de componente
 
 | Nr. piesa | Nume piesa | Site | Datasheet |
 | --- | --- | --- | --- |
@@ -34,37 +105,9 @@
 | 31 | U4 | https://www.snapeda.com/parts/MAX17048G+T10/Analog+Devices/view-part/?ref=eda | https://www.snapeda.com/parts/MAX17048G+T10/Analog%20Devices/datasheet/ |
 | 32 | TP-uri | Le-am desenat manual |  |
 
+3D Design
+![OpenBook Enclosure](Images/OpenBook%20Enclosure.png)
 
----
 
-# README – Descriere Tehnica
 
-README E-BOOK READER
-Acest dispozitiv este construit in jurul microcontrollerului ESP32-C6, un modul performant ce integreaza conectivitate WiFi si interfata USB.
-Intregul ansamblu a fost proiectat pornind de la schema electrica, rutarea PCB-ului si continuand cu modelarea 3D, unde am pozitionat toate componentele hardware si am proiectat carcasa dispozitivului astfel incat sa permita o asamblare functionala.
-Functionalitate hardware
-Hardware-ul este compus din mai multe blocuri functionale, fiecare avand rolul. Am integrat atat componente de interfata (buton, ecran), cat si senzori, circuite de alimentare si protectie.
-Alimentarea se face printr-un port USB-C, care intra intr-un circuit de protectie ESD. De aici, energia ajunge intr-un circuit integrat de incarcare – MCP73831 – care gestioneaza in mod inteligent incarcarea unei baterii LiPo de 3.7V. Tensiunea de la baterie este apoi stabilizata la 3.3V folosind un regulator LDO, pentru a putea alimenta in siguranta toate componentele electronice de pe placa.
-Am ales aceasta arhitectura simpla pentru a minimiza consumul in standby si a maximiza autonomia. In modul deep sleep, majoritatea componentelor intra in consum aproape nul, fiind alimentate doar strictul necesar: senzorul de mediu BME688.
-ESP32-C6
-ESP32-C6 este nucleul intregului sistem. L-am ales pentru ca ofera o combinatie rara de performanta, conectivitate moderna (WiFi), interfata USB device si suport pentru toate protocoalele de comunicatie de care aveam nevoie: SPI, I2C, GPIO.
-ESP-ul se ocupa cu: 
-• controlul afisajului e-paper (comunica prin SPI);
-• interactiunea cu utilizatorul prin GPIO (butoane);
-• comunicarea cu senzorul de mediu BME688 (I2C);
-• comunicarea USB pentru debugging sau transmisie de date;
-Afisajul e-paper
-Pentru afisarea informatiilor, am folosit un ecran e-paper de 7.5 inch, care are avantajul unui consum de energie extrem de redus. E-paper-ul consuma doar in momentul actualizarii imaginii – ceea ce il face ideal pentru un dispozitiv cu autonomie mare.
-Display-ul este conectat prin interfata SPI, iar pinii de control precum CS, DC, RST, BUSY sunt conectati la GPIO-uri dedicate ale ESP32. Am mapat acesti pini astfel incat sa fie usor de rutat pe placa si sa nu interfereze cu alte functii critice.
-Senzor de mediu BME688
-BME688 este un senzor care poate masura temperatura, umiditatea, presiunea. Este conectat la ESP32 prin interfata I2C, comuna cu ceasul de timp real.
-Acest senzor are un consum foarte mic, mai ales in modul standby, si este ideal pentru monitorizare ambientala. Este util pentru aplicatii care doresc sa raspunda la conditiile mediului inconjurator.
-Interfata utilizator – Butoane
-Am integrat 3 butoane tactile, fiecare conectat la un pin GPIO dedicat. Pentru eliminarea fluctuatiilor la apasare, am realizat un debounce hardware folosind filtre RC (rezistor + condensator).
-Unul dintre butoane este conectat pe GPIO0, folosit si pentru boot, iar celelalte doua sunt conectate pe GPIO-uri standard.
-Detalii despre pini
-Fiecare pin a fost ales tinand cont de: 
-usurinta de rutare;
- compatibilitatea cu perifericele ESP32-C6;
 
-![Diagrama BLOC](Diagram.png)
